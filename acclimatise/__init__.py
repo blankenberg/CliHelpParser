@@ -9,6 +9,7 @@ from pyparsing import ParseBaseException
 
 from acclimatise.converter import WrapperGenerator
 from acclimatise.converter.cwl import CwlGenerator
+from acclimatise.converter.galaxy import GalaxyGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.converter.yml import YmlGenerator
 from acclimatise.execution import execute_cmd

@@ -63,9 +63,9 @@ def main():
     "--format",
     "-f",
     "formats",
-    type=click.Choice(["wdl", "cwl", "yml"]),
+    type=click.Choice(["wdl", "cwl", "yml", "galaxy"]),
     multiple=True,
-    default=("yml", "wdl", "cwl"),
+    default=("yml", "wdl", "cwl", "galaxy"),
     help="The language in which to output the CLI wrapper",
 )
 @click.option(
@@ -123,7 +123,7 @@ def explore(
 @click.option(
     "--format",
     "-f",
-    type=click.Choice(["wdl", "cwl", "yml"]),
+    type=click.Choice(["wdl", "cwl", "yml", "galaxy"]),
     default="cwl",
     help="The language in which to output the CLI wrapper",
 )
