@@ -21,6 +21,7 @@ setup(
         "psutil",
         "dataclasses",
         "galaxyxml",
+        "galaxy-tool-util"
     ],
     python_requires=">=3.6",
     entry_points={"console_scripts": ["acclimatise = acclimatise.cli:main"]},

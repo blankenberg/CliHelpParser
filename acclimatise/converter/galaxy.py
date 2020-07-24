@@ -8,6 +8,9 @@ from typing import Generator, List
 import galaxyxml.tool as gxt
 import galaxyxml.tool.parameters as gxtp
 
+from galaxy.tool_util.lint import lint_tool_source, LEVEL_ALL, LEVEL_WARN, LEVEL_ERROR
+from galaxy.tool_util.parser import get_tool_source
+
 from dataclasses import dataclass
 
 from acclimatise import cli_types
@@ -52,7 +55,7 @@ class GalaxyGenerator(WrapperGenerator):
             raise Exception(f"Invalid type {typ}!")
 
     def save_to_string(self, cmd: Command) -> str:
-        # Some limits due to cmd data mondel?:
+        # Some current limits?:
         # No package name information
         # No version information
         # No outputs
@@ -74,10 +77,12 @@ class GalaxyGenerator(WrapperGenerator):
             tool_type=None, URL_method=None, workflow_compatible=True,
             interpreter=None, version_command=version_command)
 
-        # Does cmd have a concept of outputs?
         tool.inputs = gxtp.Inputs()
         tool.outputs = gxtp.Outputs()
-        tool.help = cmd.help_text
+        tool.help = self._format_help(cmd.help_text)
+
+        tool.tests = gxtp.Tests() # ToDo: add tests
+        tool.citations = gxtp.Citations() # ToDo: add citations
 
         # Add requirements
         requirements = gxtp.Requirements()
@@ -103,6 +108,20 @@ class GalaxyGenerator(WrapperGenerator):
 
     @classmethod
     def validate(cls, wrapper: str, cmd: Command = None, explore=True):
-        # Todo add planemo lint call
-        # probably calling the functions in this loop: https://github.com/galaxyproject/planemo/blob/2b659c9a7531f9a973e60d6319898e58ef3ea781/planemo/tool_lint.py#L28
-        pass
+        # ToDo: Tests? What level to validate?
+        # Is wrapper assumed to be generated here, or should we also compare to result of output of save_to_string (as if wrapper was being generated externally)
+        # Raise value error if validation fails
+        with tempfile.NamedTemporaryFile(mode="w+", suffix=".xml") as fh:
+            fh.write(wrapper)
+            fh.flush()
+            tool_source = get_tool_source(config_file=fh.name)
+            if not lint_tool_source(tool_source, level=LEVEL_ALL, fail_level=LEVEL_WARN):
+                raise ValueError("Linting Failed")
+        return True
+
+    def _format_help(self, help_text):
+        # Just cheat and make it a huge block quote
+        rval = "::\n"
+        for line in help_text.split('\n'):
+            rval = "%s\n  %s" % (rval, line.rstrip())
+        return "%s\n\n" % (rval)
