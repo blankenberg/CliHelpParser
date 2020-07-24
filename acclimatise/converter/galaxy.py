@@ -60,12 +60,10 @@ class GalaxyGenerator(WrapperGenerator):
         # No version information
         # No outputs
 
-
         inputs: List[CliArgument] = [*cmd.named] + (
             [] if self.ignore_positionals else [*cmd.positional]
         )
         names = self.choose_variable_names(inputs)
-
 
         tool_name = cmd.as_filename
         tool_id = cmd.as_filename
@@ -73,7 +71,7 @@ class GalaxyGenerator(WrapperGenerator):
         tool_description = ''
         tool_executable = ' '.join(cmd.command)
         version_command = "%s %s" % (tool_executable, cmd.version_flag.full_name())
-        tool = gxt.Tool(tool_name, tool_name, tool_version, tool_description, tool_executable, hidden=False,
+        tool = gxt.Tool(tool_name, tool_id, tool_version, tool_description, tool_executable, hidden=False,
             tool_type=None, URL_method=None, workflow_compatible=True,
             interpreter=None, version_command=version_command)
 
