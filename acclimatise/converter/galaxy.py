@@ -15,6 +15,19 @@ from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.yaml import yaml
 
+from galaxyxml.tool import Tool
+from galaxyxml.tool.parameters import (
+    BooleanParam,
+    FloatParam,
+    Inputs,
+    IntegerParam,
+    Outputs,
+    Requirement,
+    Requirements,
+    Tests,
+    TextParam
+)
+
 
 @dataclass
 class GalaxyGenerator(WrapperGenerator):
@@ -42,8 +55,8 @@ class GalaxyGenerator(WrapperGenerator):
             return gxtp.IntegerParam
         elif isinstance(typ, cli_types.CliBoolean):
             return gxtp.BooleanParam
-        elif isinstance(typ, cli_types.CliEnum):
-            return gxtp.BooleanParam
+        #elif isinstance(typ, cli_types.CliEnum):
+        #    return gxtp.BooleanParam
         #elif isinstance(typ, cli_types.CliList):
         #    return CwlGenerator.to_cwl_type(typ.value) + "[]"
         #elif isinstance(typ, cli_types.CliTuple):
@@ -69,7 +82,7 @@ class GalaxyGenerator(WrapperGenerator):
         tool_version = '0.0.1'
         tool_description = ''
         tool_executable = ' '.join(cmd.command)
-        version_command = "%s %s" % (tool_executable, cmd.version_flag)
+        version_command = "%s %s" % (tool_executable, cmd.version_flag.full_name())
         tool = gxt.Tool(tool_name, tool_name, tool_version, tool_description, tool_executable, hidden=False,
             tool_type=None, URL_method=None, workflow_compatible=True,
             interpreter=None, version_command=version_command)
@@ -87,16 +100,22 @@ class GalaxyGenerator(WrapperGenerator):
         for arg in names:
             assert arg.name != "", arg
             param_cls = self.to_gxy_class(arg.arg.get_type())
-            param = param_cls(arg.name, label=arg.arg.description, positional=isinstance(arg.arg, Positional),
-                                   help=arg.arg.description, value=None, num_dashes=len(arg.arg.longest_synonym)-len(arg.arg.longest_synonym.lstrip('-')),
-                                   optional=arg.arg.optional)
+            # not yet handled:
+            # default values?
+            # ints & floats: min, max
+            param = param_cls(arg.name,
+                label=arg.arg.description,
+                positional=isinstance(arg.arg, Positional),
+                help=arg.arg.description,
+                value=None,
+                num_dashes=len(arg.arg.longest_synonym)-len(arg.arg.longest_synonym.lstrip('-')),
+                optional=arg.arg.optional)
+            # output or input?
             tool.inputs.append(param)
         return tool.export()
 
-    def save_to_file(self, cmd: Command, path: Path) -> None:
-        with path.open("w") as fp:
-            fp.write(self.save_to_string(cmd))
-
     @classmethod
     def validate(cls, wrapper: str, cmd: Command = None, explore=True):
-        return True
+        # Todo add planemo lint call
+        # probably calling the functions in this loop: https://github.com/galaxyproject/planemo/blob/2b659c9a7531f9a973e60d6319898e58ef3ea781/planemo/tool_lint.py#L28
+        pass

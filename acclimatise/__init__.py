@@ -12,6 +12,7 @@ from acclimatise.converter.cwl import CwlGenerator
 from acclimatise.converter.galaxy import GalaxyGenerator
 from acclimatise.converter.wdl import WdlGenerator
 from acclimatise.converter.yml import YmlGenerator
+from acclimatise.converter.galaxy import GalaxyGenerator
 from acclimatise.execution import execute_cmd
 from acclimatise.flag_parser.parser import CliParser
 from acclimatise.model import Command, Flag

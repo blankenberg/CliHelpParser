@@ -47,7 +47,7 @@ class WrapperGenerator:
             if subclass.format() == typ:
                 return subclass
 
-        raise Exception("Unknown format type")
+        raise Exception("Unknown format type %s" % typ)
 
     @classmethod
     @abstractmethod
