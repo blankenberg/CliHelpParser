@@ -5,18 +5,16 @@ from os import PathLike
 from pathlib import Path
 from typing import Generator, List
 
-import galaxyxml.tool as gxt
-import galaxyxml.tool.parameters as gxtp
-
-from galaxy.tool_util.lint import lint_tool_source, LEVEL_ALL, LEVEL_WARN, LEVEL_ERROR
-from galaxy.tool_util.parser import get_tool_source
-
 from dataclasses import dataclass
 
+import galaxyxml.tool as gxt
+import galaxyxml.tool.parameters as gxtp
 from acclimatise import cli_types
 from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.yaml import yaml
+from galaxy.tool_util.lint import LEVEL_ALL, LEVEL_ERROR, LEVEL_WARN, lint_tool_source
+from galaxy.tool_util.parser import get_tool_source
 
 
 @dataclass
@@ -36,7 +34,7 @@ class GalaxyGenerator(WrapperGenerator):
         if isinstance(typ, cli_types.CliFile):
             return gxtp.DataParam
         elif isinstance(typ, cli_types.CliDir):
-            return gxtp.DataParam # can make composite datatype
+            return gxtp.DataParam  # can make composite datatype
         elif isinstance(typ, cli_types.CliString):
             return gxtp.TextParam
         elif isinstance(typ, cli_types.CliFloat):
@@ -45,11 +43,11 @@ class GalaxyGenerator(WrapperGenerator):
             return gxtp.IntegerParam
         elif isinstance(typ, cli_types.CliBoolean):
             return gxtp.BooleanParam
-        #elif isinstance(typ, cli_types.CliEnum):
+        # elif isinstance(typ, cli_types.CliEnum):
         #    return gxtp.BooleanParam
-        #elif isinstance(typ, cli_types.CliList):
+        # elif isinstance(typ, cli_types.CliList):
         #    return CwlGenerator.to_cwl_type(typ.value) + "[]"
-        #elif isinstance(typ, cli_types.CliTuple):
+        # elif isinstance(typ, cli_types.CliTuple):
         #    return [CwlGenerator.to_cwl_type(subtype) for subtype in set(typ.values)]
         else:
             raise Exception(f"Invalid type {typ}!")
@@ -67,24 +65,34 @@ class GalaxyGenerator(WrapperGenerator):
 
         tool_name = cmd.as_filename
         tool_id = cmd.as_filename
-        tool_version = '0.0.1'
-        tool_description = ''
-        tool_executable = ' '.join(cmd.command)
+        tool_version = "0.0.1"
+        tool_description = ""
+        tool_executable = " ".join(cmd.command)
         version_command = "%s %s" % (tool_executable, cmd.version_flag.full_name())
-        tool = gxt.Tool(tool_name, tool_id, tool_version, tool_description, tool_executable, hidden=False,
-            tool_type=None, URL_method=None, workflow_compatible=True,
-            interpreter=None, version_command=version_command)
+        tool = gxt.Tool(
+            tool_name,
+            tool_id,
+            tool_version,
+            tool_description,
+            tool_executable,
+            hidden=False,
+            tool_type=None,
+            URL_method=None,
+            workflow_compatible=True,
+            interpreter=None,
+            version_command=version_command,
+        )
 
         tool.inputs = gxtp.Inputs()
         tool.outputs = gxtp.Outputs()
         tool.help = self._format_help(cmd.help_text)
 
-        tool.tests = gxtp.Tests() # ToDo: add tests
-        tool.citations = gxtp.Citations() # ToDo: add citations
+        tool.tests = gxtp.Tests()  # ToDo: add tests
+        tool.citations = gxtp.Citations()  # ToDo: add citations
 
         # Add requirements
         requirements = gxtp.Requirements()
-        requirements.append(gxtp.Requirement('package', tool_executable, version=None))
+        requirements.append(gxtp.Requirement("package", tool_executable, version=None))
         tool.requirements = requirements
 
         for arg in names:
@@ -93,13 +101,16 @@ class GalaxyGenerator(WrapperGenerator):
             # not yet handled:
             # default values?
             # ints & floats: min, max
-            param = param_cls(arg.name,
+            param = param_cls(
+                arg.name,
                 label=arg.arg.description,
                 positional=isinstance(arg.arg, Positional),
                 help=arg.arg.description,
                 value=None,
-                num_dashes=len(arg.arg.longest_synonym)-len(arg.arg.longest_synonym.lstrip('-')),
-                optional=arg.arg.optional)
+                num_dashes=len(arg.arg.longest_synonym)
+                - len(arg.arg.longest_synonym.lstrip("-")),
+                optional=arg.arg.optional,
+            )
             # output or input?
             tool.inputs.append(param)
         return tool.export()
@@ -113,13 +124,15 @@ class GalaxyGenerator(WrapperGenerator):
             fh.write(wrapper)
             fh.flush()
             tool_source = get_tool_source(config_file=fh.name)
-            if not lint_tool_source(tool_source, level=LEVEL_ALL, fail_level=LEVEL_WARN):
+            if not lint_tool_source(
+                tool_source, level=LEVEL_ALL, fail_level=LEVEL_WARN
+            ):
                 raise ValueError("Linting Failed")
         return True
 
     def _format_help(self, help_text):
         # Just cheat and make it a huge block quote
         rval = "::\n"
-        for line in help_text.split('\n'):
+        for line in help_text.split("\n"):
             rval = "%s\n  %s" % (rval, line.rstrip())
         return "%s\n\n" % (rval)
