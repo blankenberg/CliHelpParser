@@ -15,19 +15,6 @@ from acclimatise.converter import NamedArgument, WrapperGenerator
 from acclimatise.model import CliArgument, Command, Flag, Positional
 from acclimatise.yaml import yaml
 
-from galaxyxml.tool import Tool
-from galaxyxml.tool.parameters import (
-    BooleanParam,
-    FloatParam,
-    Inputs,
-    IntegerParam,
-    Outputs,
-    Requirement,
-    Requirements,
-    Tests,
-    TextParam
-)
-
 
 @dataclass
 class GalaxyGenerator(WrapperGenerator):
